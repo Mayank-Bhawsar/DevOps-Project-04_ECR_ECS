@@ -1,0 +1,42 @@
+name: Deploy to Amazon ECS
+
+on:
+    push:
+        branches: [ "master" ]
+
+
+permissions:
+    id-token: write
+    contents: read
+
+
+jobs:
+    deploy:
+        name: Build and Push to ECR
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Checkout Source Code
+          uses: actions/checkout@v4
+
+        - name: Configure AWS Credentials via OIDC
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+            aws-region: ${{ secrets.AWS_REGION }}
+
+        - name: Log in to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v2
+
+        - name: Build, Tag, and Push Docker Image
+          id: build-image
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            ECR_REPOSITORY: django-app-repo
+            IMAGE_TAG: ${{ github.sha }}
+          run: |
+            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+            echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
