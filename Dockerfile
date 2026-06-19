@@ -12,6 +12,8 @@
 # Stage 1: Build stage with development dependencies
 FROM python:3.9-slim as builder
 
+ENV PYTHONPATH=/hello_world_django_app
+
 # Set environment variables for build
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
