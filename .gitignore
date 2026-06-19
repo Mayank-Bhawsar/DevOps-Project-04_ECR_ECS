@@ -1,0 +1,18 @@
+# Terraform tracking files
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate.lock.info
+
+# Sensitive variables
+*.tfvars
+*.tfvars.json
+
+# Local development credentials
+.cfignore
+*.pem
+
+# Python/Django specific
+__pycache__/
+*.pyc
+.env
