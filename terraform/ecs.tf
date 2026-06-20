@@ -52,6 +52,15 @@ resource "aws_ecs_task_definition" "app" {
         containerPort = 8000
         hostPort = 8000
     }]
+
+    secrets = [
+        {
+            name = "DJANGO_SECRET_KEY"
+            valueFrom = "${aws_secretsmanager_secret.app_secrets.arn}:DJANGO_SECRET_KEY::"
+        }
+    ]
+
+
     logConfiguration = {
         logDriver = "awslogs"
         options = {

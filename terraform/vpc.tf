@@ -86,10 +86,23 @@ resource "aws_instance" "nat_instance" {
 
   user_data = <<-EOF
               #!/bin/bash
+              # 1. Enable IP Forwarding in Kernel
               sysctl -w net.ipv4.ip_forward=1
               echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
-              dnf install iptables -y
-              iptables -t nat -A POSTROUTING -o x86_64 -j MASQUERADE
+              
+              # 2. Install iptables service management
+              dnf install iptables-services -y
+              systemctl enable iptables
+              systemctl start iptables
+              
+              # 3. Clear existing rules and setup NAT Masquerading dynamically
+              iptables -F
+              iptables -t nat -F
+              IFACE=$(ip route | grep default | awk '{print $5}')
+              iptables -t nat -A POSTROUTING -o $IFACE -j MASQUERADE
+              
+              # 4. Save rules so they persist immediately
+              service iptables save
               EOF
 
   tags = {
