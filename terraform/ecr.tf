@@ -1,5 +1,6 @@
 resource "aws_ecr_repository" "django_app" {
   name = "django-app-repo"
+  force_delete = true
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
